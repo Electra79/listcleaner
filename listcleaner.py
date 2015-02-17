@@ -24,7 +24,7 @@ def file_check():
     try:
         check_file = open(defaultPath)
     except IOError:
-        check_file = open(defaultPath, "w")
+        check_file = open(defaultPath, "a")
     check_file.close()
 
 def banner():
@@ -36,35 +36,49 @@ def banner():
 
 #Make the magic happen ;)
 def main():
+    #User specifies options
     print("Enter the path of the file you would like to clean: ")
     fileIn = input("> ")
-    print("What is the minimum word length you'd like to keep? (Remember that WPA/WPA2 requires 8 character minimum)")
-    wordMin = input("> ")
-    print("What is the maximum word length you'd like to keep? (Remember that WPA/WPA2 only takes 63 character maximum)")
-    wordMax = input("> ")
+    print("What is the minimum length you'd like to keep? Remember that WPA/WPA2 requires 8 characters")
+    wordMin = int(input("> "))
+    print("What is the maximum word length you'd like to keep? Remember that WPA/WPA2 requires 63 characters")
+    wordMax = int(input("> "))
+    wordMax = wordMax + 1
+    wordMin = wordMin + 1
     with open(fileIn) as FTC:
         print("Would you like to write to your own file? Y/N")
         choice = input("> ")
         #If the user wants to specify their own path
         if choice.lower() == 'y':
             print("Enter the path of the file you wish to write to: ")
-            defaultPath = input("> ")
-            file_check()
-            print("Writing to: "+defaultPath+"")
-            with open(defaultPath, "a") as f:
+            userPath = input("> ")
+            if not os.path.exists(userPath):
+                os.makedirs(userPath)
+                print("Creating path")
+            print("Name your file")
+            userFile = input("> ")
+            try:
+                checkFile = open(userFile)
+            except IOError:
+                print("Creating file")
+                checkFile = open(userFile, "a+")
+                print("Creating file")
+            checkFile.close()
+            userWrite = (""+userPath+""+userFile+"")
+            print("Writing to: "+userPath+""+userFile+"")
+            with open(userWrite, "a") as f:
                 for line in FTC:
-                    if len(line) > wordMin + 1:
-                        if len(line) < wordMax + 1:
+                    if len(line) > wordMin:
+                        if len(line) < wordMax:
                             f.writelines(line)
         #Otherwise write to the default file
         else:
             defaultPath = ("/usr/share/wordlists/listcleaner/wpa.txt")
-            file_check()
             print("Writing to: /usr/share/wordlists/listcleaner/wpa.txt")
             with open(defaultPath, "a") as f:
                 for line in FTC:
-                    if len(line) > wordMin + 1:
-                        if len(line) < wordMax + 1:
+                    if len(line) > wordMin:
+                        if len(line) < wordMax:
                             f.writelines(line)
     #Gives user option to clean more than one file per session
     print("Finished writing. Would you like to clean another file? Y/N")
@@ -72,9 +86,11 @@ def main():
     if restart.lower() == 'y':
         main()
     else:
+        print("Goodbye")
         sys.exit()
 
 #Checks if the file exists before running main
 default_path()
 banner()
+file_check()
 main()
